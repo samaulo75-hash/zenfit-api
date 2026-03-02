@@ -1,11 +1,15 @@
-import mysql.connector
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        port=3307,
-        user="root",
-        password="almohada11",
-        database="zenfit",
-        auth_plugin="mysql_native_password"
-    )
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

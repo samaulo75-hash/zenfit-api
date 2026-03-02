@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from db import get_connection
+from models import Base
+from db import engine
 from auth import router as auth_router
 
-app = FastAPI()
+app = FastAPI(title="ZenFit API")
 
-# CORS (para que Vue pueda conectarse)
+Base.metadata.create_all(bind=engine)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,18 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/usuarios")
-def obtener_usuarios():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+@app.get("/")
+def root():
+    return {"message": "ZenFit API funcionando en Render 🚀"}
 
-    cursor.execute("SELECT id, nombre, email FROM usuarios")
-    usuarios = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return usuarios
-
-# Rutas de auth
 app.include_router(auth_router)
