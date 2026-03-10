@@ -1,7 +1,8 @@
-from passlib.context import CryptContext
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
+from passlib.context import CryptContext
+
+from db import get_db
 from models import Usuario
 from schemas import RegisterUser, LoginUser
 
@@ -21,12 +22,10 @@ def verify_password(plain_password: str, hashed_password: str):
 
 @router.post("/register")
 def register(user: RegisterUser, db: Session = Depends(get_db)):
-    # Verificar si el email ya existe
     existing_user = db.query(Usuario).filter(Usuario.email == user.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
 
-    # Crear usuario nuevo
     new_user = Usuario(
         nombre=user.nombre,
         email=user.email,
